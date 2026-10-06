@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder
 
 
+# ============================================================
+# Genre classes
+# ============================================================
+
 GENRES = [
     "blues",
     "classical",
@@ -21,6 +25,10 @@ GENRES = [
 ]
 
 
+# ============================================================
+# Extract Mel-Spectrogram
+# ============================================================
+
 def extract_mel_spectrogram(
     file_path,
     sample_rate=22050,
@@ -28,11 +36,11 @@ def extract_mel_spectrogram(
     n_fft=2048,
     hop_length=512
 ):
-    """
-    Extract a log-scaled mel-spectrogram from an audio file.
-    """
 
-    audio, sr = librosa.load(file_path, sr=sample_rate)
+    audio, sr = librosa.load(
+        file_path,
+        sr=sample_rate
+    )
 
     mel = librosa.feature.melspectrogram(
         y=audio,
@@ -42,44 +50,53 @@ def extract_mel_spectrogram(
         n_mels=n_mels
     )
 
-    mel_db = librosa.power_to_db(mel, ref=np.max)
+    mel_db = librosa.power_to_db(
+        mel,
+        ref=np.max
+    )
 
     return mel_db
 
 
+# ============================================================
+# Convert Spectrogram to Features
+# ============================================================
+
 def spectrogram_to_features(mel_spectrogram):
-    """
-    Convert a mel-spectrogram into a fixed-length feature vector.
 
-    We calculate the mean and standard deviation across time
-    for every mel-frequency band.
-    """
+    mean_features = np.mean(
+        mel_spectrogram,
+        axis=1
+    )
 
-    mean_features = np.mean(mel_spectrogram, axis=1)
-    std_features = np.std(mel_spectrogram, axis=1)
+    std_features = np.std(
+        mel_spectrogram,
+        axis=1
+    )
 
     features = np.concatenate(
-        [mean_features, std_features]
+        [
+            mean_features,
+            std_features
+        ]
     )
 
     return features
 
 
+# ============================================================
+# Build Feature Dataset
+# ============================================================
+
 def build_feature_dataset(dataset_path):
-    """
-    Process all GTZAN audio files and create X and y.
-
-    X shape:
-        (number_of_audio_files, number_of_features)
-
-    y shape:
-        (number_of_audio_files,)
-    """
 
     X = []
     y = []
 
-    total_files = 0
+    print()
+    print("Dataset path:")
+    print(dataset_path)
+    print()
 
     for genre in GENRES:
 
@@ -89,15 +106,24 @@ def build_feature_dataset(dataset_path):
         )
 
         if not os.path.isdir(genre_path):
-            print(f"Warning: missing folder: {genre_path}")
+
+            print(
+                f"WARNING: Missing folder: {genre_path}"
+            )
+
             continue
 
         audio_files = [
-            f for f in os.listdir(genre_path)
-            if f.lower().endswith((".wav", ".au", ".mp3"))
+            f
+            for f in os.listdir(genre_path)
+            if f.lower().endswith(
+                (".wav", ".au", ".mp3")
+            )
         ]
 
-        print(f"{genre}: {len(audio_files)} files")
+        print(
+            f"{genre}: {len(audio_files)} files"
+        )
 
         for filename in audio_files:
 
@@ -107,6 +133,7 @@ def build_feature_dataset(dataset_path):
             )
 
             try:
+
                 mel = extract_mel_spectrogram(
                     file_path
                 )
@@ -118,9 +145,8 @@ def build_feature_dataset(dataset_path):
                 X.append(features)
                 y.append(genre)
 
-                total_files += 1
-
             except Exception as e:
+
                 print(
                     f"Error processing {file_path}: {e}"
                 )
@@ -131,19 +157,22 @@ def build_feature_dataset(dataset_path):
     return X, y
 
 
+# ============================================================
+# Save Sample Spectrogram
+# ============================================================
+
 def save_sample_spectrogram(
     audio_file,
     output_file
 ):
-    """
-    Save a visual example of a mel-spectrogram.
-    """
 
     mel = extract_mel_spectrogram(
         audio_file
     )
 
-    plt.figure(figsize=(10, 4))
+    plt.figure(
+        figsize=(10, 4)
+    )
 
     librosa.display.specshow(
         mel,
@@ -153,25 +182,52 @@ def save_sample_spectrogram(
         y_axis="mel"
     )
 
-    plt.colorbar(format="%+2.0f dB")
-    plt.title("Mel-Spectrogram")
+    plt.colorbar(
+        format="%+2.0f dB"
+    )
+
+    plt.title(
+        "Mel-Spectrogram"
+    )
+
     plt.tight_layout()
 
-    plt.savefig(output_file)
+    plt.savefig(
+        output_file
+    )
+
     plt.close()
 
 
+# ============================================================
+# Main Program
+# ============================================================
+
 if __name__ == "__main__":
+
+    # --------------------------------------------------------
+    # Project root
+    # --------------------------------------------------------
 
     project_root = os.path.dirname(
         os.path.dirname(__file__)
     )
 
+    # --------------------------------------------------------
+    # CORRECT GTZAN DATASET PATH
+    # --------------------------------------------------------
+
     dataset_path = os.path.join(
         project_root,
         "dataset",
-        "GTZAN"
+        "GTZAN",
+        "Data",
+        "genres_original"
     )
+
+    # --------------------------------------------------------
+    # Results directory
+    # --------------------------------------------------------
 
     results_path = os.path.join(
         project_root,
@@ -183,29 +239,89 @@ if __name__ == "__main__":
         exist_ok=True
     )
 
+    # --------------------------------------------------------
+    # Check dataset
+    # --------------------------------------------------------
+
     print("=" * 60)
-    print("Building GTZAN feature dataset")
+    print("CHECKING DATASET PATH")
+    print("=" * 60)
+
+    print(dataset_path)
+
+    if not os.path.isdir(dataset_path):
+
+        print()
+        print("ERROR: Dataset folder not found!")
+        print(dataset_path)
+        exit()
+
+    print()
+    print("Dataset folder found!")
+
+    # --------------------------------------------------------
+    # Feature extraction
+    # --------------------------------------------------------
+
+    print()
+    print("=" * 60)
+    print("BUILDING GTZAN FEATURE DATASET")
     print("=" * 60)
 
     X, y = build_feature_dataset(
         dataset_path
     )
 
+    # --------------------------------------------------------
+    # Display results
+    # --------------------------------------------------------
+
     print()
     print("=" * 60)
-    print("Feature extraction complete")
+    print("FEATURE EXTRACTION COMPLETE")
     print("=" * 60)
 
-    print("X shape:", X.shape)
-    print("y shape:", y.shape)
+    print(
+        "X shape:",
+        X.shape
+    )
 
-    # Encode genre names as integers.
+    print(
+        "y shape:",
+        y.shape
+    )
+
+    # --------------------------------------------------------
+    # Check if features were extracted
+    # --------------------------------------------------------
+
+    if len(X) == 0:
+
+        print()
+        print("ERROR: No features were extracted.")
+        print("Please check the dataset.")
+        exit()
+
+    # --------------------------------------------------------
+    # Encode genre labels
+    # --------------------------------------------------------
+
     label_encoder = LabelEncoder()
-    y_encoded = label_encoder.fit_transform(y)
 
-    print("Encoded labels:", label_encoder.classes_)
+    y_encoded = label_encoder.fit_transform(
+        y
+    )
 
-    # Save feature arrays.
+    print()
+    print(
+        "Encoded labels:",
+        label_encoder.classes_
+    )
+
+    # --------------------------------------------------------
+    # Save feature dataset
+    # --------------------------------------------------------
+
     np.save(
         os.path.join(
             results_path,
@@ -222,7 +338,6 @@ if __name__ == "__main__":
         y_encoded
     )
 
-    # Save genre names.
     np.save(
         os.path.join(
             results_path,
@@ -231,8 +346,52 @@ if __name__ == "__main__":
         label_encoder.classes_
     )
 
+    # --------------------------------------------------------
+    # Save sample spectrogram
+    # --------------------------------------------------------
+
+    sample_audio = os.path.join(
+        dataset_path,
+        "blues",
+        "blues.00000.wav"
+    )
+
+    sample_output = os.path.join(
+        results_path,
+        "sample_spectrogram.png"
+    )
+
+    if os.path.isfile(sample_audio):
+
+        save_sample_spectrogram(
+            sample_audio,
+            sample_output
+        )
+
+    # --------------------------------------------------------
+    # Final message
+    # --------------------------------------------------------
+
     print()
-    print("Saved:")
-    print("results/X_features.npy")
-    print("results/y_labels.npy")
-    print("results/genre_classes.npy")
+    print("=" * 60)
+    print("FILES SAVED")
+    print("=" * 60)
+
+    print(
+        "results/X_features.npy"
+    )
+
+    print(
+        "results/y_labels.npy"
+    )
+
+    print(
+        "results/genre_classes.npy"
+    )
+
+    print(
+        "results/sample_spectrogram.png"
+    )
+
+    print()
+    print("Feature extraction completed successfully!")
