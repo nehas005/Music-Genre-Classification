@@ -1,90 +1,148 @@
-# Music Genre Classification
+# 🎵 Music Genre Classification
 
-Music genre classification using the GTZAN dataset, mel-spectrogram features, traditional machine learning models, and a CNN.
+A machine learning and deep learning project for automatically classifying music into different genres using the **GTZAN Music Genre Dataset**.
 
-## Dataset
+The project compares traditional machine learning models (**SVM and k-NN**) with a **Convolutional Neural Network (CNN)** using audio features and Mel-spectrogram representations.
 
-The project uses the GTZAN music genre dataset.
+---
 
-The dataset contains 10 genres:
+## 📌 Project Overview
 
-- blues
-- classical
-- country
-- disco
-- hiphop
-- jazz
-- metal
-- pop
-- reggae
-- rock
+Music genre classification is the task of automatically identifying the genre of a music recording based on its audio characteristics.
 
-One corrupted audio file (`jazz.00054.wav`) was excluded because it could not be decoded during feature extraction.
+In this project, audio files are processed to extract meaningful features from their frequency information. These features are then used to train and evaluate multiple classification models.
 
-## Person 1 - Traditional Machine Learning
+The project implements:
 
-Person 1 implemented:
-
-- Audio loading and preprocessing
-- Mel-spectrogram extraction
-- Feature preparation
-- Train/validation/test splitting
+- Audio preprocessing
+- Mel-spectrogram generation
+- Statistical feature extraction
 - Feature scaling
-- SVM classification
-- k-NN classification
-- Baseline evaluation
-- Saved traditional ML models
+- Dataset splitting
+- Support Vector Machine (SVM)
+- k-Nearest Neighbors (k-NN)
+- Convolutional Neural Network (CNN)
+- Model evaluation
+- Confusion matrix analysis
+- Accuracy comparison
 
-## Feature Extraction
+The objective is to compare traditional machine learning approaches with a deep learning approach and determine which model performs best on the test dataset.
 
-Each audio file is converted into a log-scaled mel-spectrogram.
+---
 
-For traditional ML, each spectrogram is converted into a fixed-length feature vector using:
+# 📂 Dataset
 
-- Mean across time for each mel-frequency band
-- Standard deviation across time for each mel-frequency band
+The project uses the **GTZAN Music Genre Dataset**.
 
-This produces 256 features per audio file.
+The dataset contains music belonging to 10 different genres:
 
-## Dataset Split
+1. Blues
+2. Classical
+3. Country
+4. Disco
+5. Hip-Hop
+6. Jazz
+7. Metal
+8. Pop
+9. Reggae
+10. Rock
 
-The dataset is split into:
+Each genre is represented as a separate class.
 
-- 70% training
-- 15% validation
-- 15% testing
+During feature extraction, one corrupted audio file:
 
-A fixed random seed of 42 is used.
+`jazz.00054.wav`
 
-## Traditional ML Results
+was excluded because it could not be decoded successfully.
 
-| Model | Validation Accuracy | Test Accuracy |
-|---|---:|---:|
-| SVM | 68.00% | **68.67%** |
-| k-NN | 56.67% | **50.00%** |
+After removing the corrupted file, the project contains:
 
-SVM performed better than k-NN on the test set.
+**999 usable audio samples.**
 
-## Saved Models
+---
 
-The following models are generated:
+# 🎯 Objectives
 
-- `models/svm_model.pkl`
-- `models/knn_model.pkl`
-- `models/scaler.pkl`
+The main objectives of this project are:
 
-## Results
+- To preprocess music audio files.
+- To convert audio signals into Mel-spectrogram representations.
+- To extract useful numerical features from the spectrograms.
+- To train traditional machine learning classifiers.
+- To train a CNN using spectrogram-based representations.
+- To evaluate the performance of each model.
+- To compare the models using test accuracy.
+- To analyze classification errors using confusion matrices.
+- To identify the best-performing model.
 
-The project generates:
+---
 
-- `results/sample_spectrogram.png`
-- `results/accuracy_comparison.png`
+# 🛠️ Technologies Used
 
-Additional feature and test arrays are stored in the `results/` directory.
+The project is implemented using Python and the following technologies:
 
-## Running the Project
+- **Python**
+- **NumPy**
+- **Librosa**
+- **Scikit-learn**
+- **TensorFlow / Keras**
+- **Matplotlib**
+- **Pandas**
 
-Install dependencies:
+### Machine Learning
 
-```bash
-python -m pip install -r requirements.txt
+- Support Vector Machine (SVM)
+- k-Nearest Neighbors (k-NN)
+
+### Deep Learning
+
+- Convolutional Neural Network (CNN)
+
+### Audio Processing
+
+- Mel-spectrogram
+- Log-scaled Mel-spectrogram
+- Statistical feature extraction
+
+---
+
+# 🔄 Project Workflow
+
+The overall workflow of the project is:
+
+```text
+             GTZAN Audio Dataset
+                     │
+                     ▼
+             Audio Preprocessing
+                     │
+                     ▼
+             Mel-Spectrogram
+                     │
+          ┌──────────┴──────────┐
+          │                     │
+          ▼                     ▼
+   Feature Extraction      Spectrogram Input
+          │                     │
+          ▼                     ▼
+   Mean + Standard Dev.        CNN
+          │                     │
+          ▼                     │
+     256 Features               │
+          │                     │
+          ▼                     │
+    Feature Scaling             │
+          │                     │
+       ┌──┴───┐                 │
+       ▼      ▼                 │
+      SVM    k-NN               │
+       │      │                 │
+       └──┬───┘                 │
+          │                     │
+          └─────────┬───────────┘
+                    ▼
+              Model Evaluation
+                    │
+                    ▼
+          Accuracy + Confusion
+                Matrices
