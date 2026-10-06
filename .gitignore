@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+*.pyo
+
+venv/
+.venv/
+env/
+
+.ipynb_checkpoints/
+
+# Do not push the large GTZAN dataset
+dataset/GTZAN/
+
+# CNN model can be added later
+# Generated feature arrays
+results/*.npy
+
+# OS files
+.DS_Store
+Thumbs.db
